@@ -141,3 +141,10 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ],
 }
+
+# SEGURIDAD PARA EL DEPLOY
+# Esto le dice a Django que confíe en tu link de Railway para el Login
+CSRF_TRUSTED_ORIGINS = [
+    'https://web-production-43c01.up.railway.app',
+] #Para usuarios en el deploy
+
