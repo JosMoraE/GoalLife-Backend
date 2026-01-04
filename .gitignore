@@ -1,0 +1,16 @@
+# Created by venv; see https://docs.python.org/3/library/venv.html
+# Ignorar carpeta de entorno virtual sino no funcionaria el gitignore para un deploy ya que el env es una sesion local
+env/
+venv/
+
+# Ignorar base de datos local (Railway creará la suya propia)
+*.sqlite3
+db.sqlite3
+
+# Ignorar archivos compilados de Python (Basura)
+__pycache__/
+*.pyc
+*.pyo
+
+# Archivos del sistema
+.DS_Store
