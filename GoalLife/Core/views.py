@@ -199,7 +199,7 @@ def api_eliminar_gasto(request, gasto_id):
 
 #Categorias
 @api_view(['GET'])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def api_categorias(request):
     categorias = Categoria.objects.all()
     serializer = CategoriaSerializer(categorias, many=True)
