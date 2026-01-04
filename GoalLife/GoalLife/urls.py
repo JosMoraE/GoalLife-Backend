@@ -23,15 +23,16 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     path('api/login/', auth_views.obtain_auth_token),
-
+    path('api/register/', views.api_registrar_usuario,name='api_registrar_usuario'), #Ruta para registrar una cuenta nueva
+    #Home y datos
     path('api/home/', views.api_home, name='api_home'), #ruta para celular
     
     #Nueva Ruta
     path('api/metas/crear/', views.api_crear_meta, name='api_crear_meta'),
     path('api/gastos/crear/', views.api_crear_gasto, name='api_crear_gasto' ),
-
     path('api/metas/sumar/', views.api_sumar_ahorro, name='api_sumar_ahorro'),
-    #Ruta de autenticacion
+    
+    #Ruta de autenticacion y Perfil
     path('api/profile-summary/', views.UserProfileSummaryView.as_view(), name='profile_sumary'),   
 
     #Ruta para borrar registros

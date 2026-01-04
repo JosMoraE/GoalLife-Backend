@@ -2,22 +2,46 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework import status
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from .models import Meta, Gasto, Categoria
-from .serializers import MetaSerializer, GastoSerializer, CategoriaSerializer
+from .serializers import MetaSerializer, GastoSerializer, CategoriaSerializer, RegistroSerializer
 from django.db.models import Sum
 from decimal import Decimal
 
-from rest_framework.permissions import AllowAny #Esto es solo para las pruebas
 from django.contrib.auth import get_user_model
 
+from rest_framework.authtoken.models import Token # Importante para dar la llave al registrarse
 # GET = Obtener informacion, POST = Mostrar o Enviar
+
+
+# VISTA DE REGISTRO Para registrar nuevos usuarios
+@api_view(['POST'])
+@permission_classes([AllowAny]) # Permitimos que cualquiera entre aquí sin token
+def api_registrar_usuario(request):
+    serializer = RegistroSerializer(data=request.data)
+    if serializer.is_valid():
+        # Guardar el usuario (se encripta la pass en el serializer)
+        user = serializer.save()
+        
+        # Crear o recuperar el token para este nuevo usuario
+        token, created = Token.objects.get_or_create(user=user)
+        
+        return Response({
+            'token': token.key,
+            'user_id': user.pk,
+            'username': user.username,
+            'mensaje': 'Usuario creado exitosamente'
+        }, status=status.HTTP_201_CREATED)
+    
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 #Mostramos la informacion general
 @api_view(['GET'])
+@permission_classes([IsAuthenticated])
 def api_home(request):
-    metas = Meta.objects.all()
-    gastos = Gasto.objects.all()
+    #Se filtra por usuario
+    metas = Meta.objects.filter(usuario = request.user)
+    gastos = Gasto.objects.filter(usuario = request.user).order_by('-fecha_gasto')
 
     #CALCULOS
     #Logica de suma
@@ -72,19 +96,23 @@ def api_crear_gasto(request):
     print("Gasto recibido del celular", request.data)
 
     #Usuarios
-    User = get_user_model()
-    user = User.objects.first()
+    user = request.user
 
     #Pasar datos al serializador
 
     serializer = GastoSerializer(data=request.data)
 
     if serializer.is_valid():
-        serializer.save(usuario = user)
+        #Logica de gasto hormiga
+        monto = serializer.validated_data.get('cantidad', 0)
+        es_hormiga_calc = False
+        if monto < 10:
+            es_hormiga_calc = True
+
+        serializer.save(usuario = user, es_hormiga=es_hormiga_calc)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
     
     print("ERROR DE VALIDACION: ", serializer.errors)
-
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -96,7 +124,7 @@ def api_sumar_ahorro(request):
 
     try:
         #Buscamos meta especifica
-        meta = Meta.objects.get(id=meta_id)
+        meta = Meta.objects.get(id=meta_id, usuario = request.user)
 
         #LOGICA DE AHORRO
         #Se convierte a float para sumar decimales
