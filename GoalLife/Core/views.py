@@ -56,7 +56,11 @@ def api_home(request):
     metas_serializer = MetaSerializer(metas, many=True)
     gastos_serializer = GastoSerializer(gastos, many=True)
 
+    # Obtenemos el nombre para saludar
+    nombre_mostrar = request.user.first_name if request.user.first_name else request.user.username
+
     return Response({
+        'nombre_usuario': nombre_mostrar,
         'resumen': {
             'total_objetivo': total_objetivo,
             'total_gastado': total_gasto,
@@ -167,7 +171,7 @@ class UserProfileSummaryView(APIView):
 
         data = {
             "full_name": nombre_completo,
-            "role_description": "Estudiante & Ahorrador", 
+            "role_description": user.email,
             "total_savings": total_ahorrado,
             "active_goals_value": valor_metas_activas
         }
