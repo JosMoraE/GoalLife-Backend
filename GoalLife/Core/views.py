@@ -46,11 +46,11 @@ def api_home(request):
     #CALCULOS
     #Logica de suma
     #Sumamos todo el dinero de los objetivos
-    total_objetivo = Meta.objects.aggregate(Sum('monto_objetivo'))['monto_objetivo__sum'] or 0
+    total_objetivo = metas.objects.aggregate(Sum('monto_objetivo'))['monto_objetivo__sum'] or 0
     #Sumamos todo lo gastado
-    total_gasto = Gasto.objects.aggregate(Sum('cantidad'))['cantidad__sum'] or 0
+    total_gasto = gastos.objects.aggregate(Sum('cantidad'))['cantidad__sum'] or 0
     #Todo lo ahorrado
-    total_ahorrado = Meta.objects.aggregate(Sum('monto_actual'))['monto_actual__sum'] or 0
+    total_ahorrado = metas.objects.aggregate(Sum('monto_actual'))['monto_actual__sum'] or 0
     
 
     metas_serializer = MetaSerializer(metas, many=True)
